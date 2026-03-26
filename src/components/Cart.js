@@ -1,0 +1,280 @@
+import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { removeFromCart, clearCart } from '../redux/cartActions';
+
+// Cart component to display cart items and total price
+const Cart = () => {
+  const dispatch = useDispatch();
+  const cartItems = useSelector((state) => state.items);
+
+  // Calculate total price using reduce
+  const totalPrice = cartItems.reduce((total, item) => total + item.price, 0);
+
+  // Handle remove item from cart
+  const handleRemoveItem = (cartId) => {
+    dispatch(removeFromCart(cartId));
+  };
+
+  // Handle clear entire cart
+  const handleClearCart = () => {
+    if (window.confirm('Are you sure you want to clear your cart?')) {
+      dispatch(clearCart());
+    }
+  };
+
+  // Cart inline styles for professional appearance
+  const styles = {
+    container: {
+      padding: '40px 20px',
+      background: '#f8f9fa',
+      minHeight: '60vh',
+    },
+    wrapper: {
+      maxWidth: '900px',
+      margin: '0 auto',
+    },
+    header: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '30px',
+    },
+    title: {
+      fontSize: '28px',
+      fontWeight: '700',
+      color: '#1a1a1a',
+    },
+    emptyCart: {
+      textAlign: 'center',
+      padding: '60px 20px',
+      background: '#ffffff',
+      borderRadius: '12px',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+    },
+    emptyIcon: {
+      fontSize: '60px',
+      marginBottom: '16px',
+    },
+    emptyText: {
+      fontSize: '18px',
+      color: '#666666',
+    },
+    cartList: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '12px',
+    },
+    cartItem: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      background: '#ffffff',
+      padding: '16px 20px',
+      borderRadius: '8px',
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+      transition: 'all 0.3s ease',
+    },
+    cartItemHover: {
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+      transform: 'translateX(4px)',
+    },
+    itemInfo: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '16px',
+      flex: 1,
+    },
+    itemImage: {
+      fontSize: '32px',
+    },
+    itemDetails: {
+      flex: 1,
+    },
+    itemName: {
+      fontSize: '16px',
+      fontWeight: '600',
+      color: '#1a1a1a',
+      marginBottom: '4px',
+    },
+    itemPrice: {
+      fontSize: '14px',
+      color: '#ff6b35',
+      fontWeight: '600',
+    },
+    removeButton: {
+      background: '#ff6b35',
+      color: '#ffffff',
+      border: 'none',
+      padding: '8px 12px',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      fontWeight: '600',
+      fontSize: '12px',
+      transition: 'all 0.3s ease',
+      boxShadow: '0 2px 6px rgba(255, 107, 53, 0.3)',
+    },
+    removeButtonHover: {
+      background: '#e55100',
+      boxShadow: '0 4px 10px rgba(255, 107, 53, 0.4)',
+    },
+    footer: {
+      marginTop: '30px',
+      background: '#ffffff',
+      padding: '24px',
+      borderRadius: '12px',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+    },
+    totalSection: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      borderBottom: '2px solid #efefef',
+      paddingBottom: '16px',
+      marginBottom: '16px',
+    },
+    totalLabel: {
+      fontSize: '18px',
+      fontWeight: '600',
+      color: '#1a1a1a',
+    },
+    totalPrice: {
+      fontSize: '28px',
+      fontWeight: '700',
+      color: '#ff6b35',
+    },
+    buttonGroup: {
+      display: 'flex',
+      gap: '12px',
+      justifyContent: 'flex-end',
+    },
+    clearButton: {
+      background: '#ffffff',
+      color: '#ff6b35',
+      border: '2px solid #ff6b35',
+      padding: '10px 20px',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      fontWeight: '600',
+      fontSize: '14px',
+      transition: 'all 0.3s ease',
+    },
+    clearButtonHover: {
+      background: '#fff5f0',
+    },
+    checkoutButton: {
+      background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)',
+      color: '#ffffff',
+      border: 'none',
+      padding: '12px 28px',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      fontWeight: '600',
+      fontSize: '14px',
+      transition: 'all 0.3s ease',
+      boxShadow: '0 4px 12px rgba(255, 107, 53, 0.3)',
+    },
+    checkoutButtonHover: {
+      transform: 'scale(1.05)',
+      boxShadow: '0 6px 16px rgba(255, 107, 53, 0.4)',
+    },
+  };
+
+  const [hoveredItemId, setHoveredItemId] = React.useState(null);
+  const [hoveredButtonType, setHoveredButtonType] = React.useState(null);
+
+  // If cart is empty, show empty state
+  if (cartItems.length === 0) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.wrapper}>
+          <h2 style={styles.title}>Your Cart</h2>
+          <div style={styles.emptyCart}>
+            <div style={styles.emptyIcon}>🛒</div>
+            <p style={styles.emptyText}>Your cart is empty. Start adding some delicious food!</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={styles.container}>
+      <div style={styles.wrapper}>
+        <div style={styles.header}>
+          <h2 style={styles.title}>Your Cart</h2>
+          <span style={{ fontSize: '14px', color: '#666666' }}>
+            {cartItems.length} item{cartItems.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+
+        <div style={styles.cartList}>
+          {cartItems.map((item) => (
+            <div
+              key={item.cartId}
+              style={{
+                ...styles.cartItem,
+                ...(hoveredItemId === item.cartId ? styles.cartItemHover : {}),
+              }}
+              onMouseEnter={() => setHoveredItemId(item.cartId)}
+              onMouseLeave={() => setHoveredItemId(null)}
+            >
+              <div style={styles.itemInfo}>
+                <span style={styles.itemImage}>{item.image}</span>
+                <div style={styles.itemDetails}>
+                  <p style={styles.itemName}>{item.name}</p>
+                  <p style={styles.itemPrice}>₹{item.price}</p>
+                </div>
+              </div>
+
+              <button
+                style={{
+                  ...styles.removeButton,
+                  ...(hoveredButtonType === item.cartId ? styles.removeButtonHover : {}),
+                }}
+                onMouseEnter={() => setHoveredButtonType(item.cartId)}
+                onMouseLeave={() => setHoveredButtonType(null)}
+                onClick={() => handleRemoveItem(item.cartId)}
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div style={styles.footer}>
+          <div style={styles.totalSection}>
+            <span style={styles.totalLabel}>Total Amount:</span>
+            <span style={styles.totalPrice}>₹{totalPrice}</span>
+          </div>
+
+          <div style={styles.buttonGroup}>
+            <button
+              style={{
+                ...styles.clearButton,
+                ...(hoveredButtonType === 'clear' ? styles.clearButtonHover : {}),
+              }}
+              onMouseEnter={() => setHoveredButtonType('clear')}
+              onMouseLeave={() => setHoveredButtonType(null)}
+              onClick={handleClearCart}
+            >
+              Clear Cart
+            </button>
+            <button
+              style={{
+                ...styles.checkoutButton,
+                ...(hoveredButtonType === 'checkout' ? styles.checkoutButtonHover : {}),
+              }}
+              onMouseEnter={() => setHoveredButtonType('checkout')}
+              onMouseLeave={() => setHoveredButtonType(null)}
+              onClick={() => alert(`Proceeding to checkout with total: ₹${totalPrice}`)}
+            >
+              Proceed to Checkout
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Cart;
