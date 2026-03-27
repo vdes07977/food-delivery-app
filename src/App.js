@@ -1,12 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import Header from './components/Header';
 import FoodList from './components/FoodList';
 import Cart from './components/Cart';
+import { clearCart } from './redux/cartActions';
 
 // Main App component with navigation between FoodList and Cart
 const App = () => {
   // State to manage which view is active (foodlist or cart)
   const [activeView, setActiveView] = useState('foodlist');
+  const dispatch = useDispatch();
+
+  // Initialize cart on mount - clear old cache
+  useEffect(() => {
+    // Migration: Clear old cart cache that may have incorrect structure
+    const oldCart = localStorage.getItem('cart');
+    if (oldCart) {
+      try {
+        // If old cart exists, clear it to force re-initialization with new structure
+        localStorage.removeItem('cart');
+      } catch (error) {
+        console.error('Error clearing old cart:', error);
+      }
+    }
+  }, [dispatch]);
 
   // App inline styles
   const styles = {
