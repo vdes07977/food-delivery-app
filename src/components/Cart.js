@@ -7,17 +7,11 @@ const Cart = () => {
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.items);
 
-  // Normalize cart items to ensure they have quantity property
-  const normalizedItems = cartItems.map((item) => ({
-    ...item,
-    quantity: item.quantity || 1,
-  }));
-
   // Calculate total price using reduce (price * quantity)
-  const totalPrice = normalizedItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
   
   // Calculate total quantity
-  const totalItems = normalizedItems.reduce((total, item) => total + item.quantity, 0);
+  const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   // Handle remove item from cart
   const handleRemoveItem = (itemId) => {
@@ -257,12 +251,12 @@ const Cart = () => {
         <div style={styles.header}>
           <h2 style={styles.title}>Your Cart</h2>
           <span style={{ fontSize: '14px', color: '#666666' }}>
-            {normalizedItems.length} item{normalizedItems.length !== 1 ? 's' : ''} ({totalItems} total)
+            {cartItems.length} item{cartItems.length !== 1 ? 's' : ''} ({totalItems} total)
           </span>
         </div>
 
         <div style={styles.cartList}>
-          {normalizedItems.map((item) => (
+          {cartItems.map((item) => (
             <div
               key={item.id}
               style={{
