@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToCart } from '../redux/cartActions';
+import { addToCart, increaseQuantity, decreaseQuantity } from '../redux/cartActions';
 
 // Individual food item card component
 const FoodItem = ({ id, name, price, image, description }) => {
@@ -14,6 +14,16 @@ const FoodItem = ({ id, name, price, image, description }) => {
   // Handle add to cart action
   const handleAddToCart = () => {
     dispatch(addToCart({ id, name, price, image, description }));
+  };
+
+  // Handle increase quantity
+  const handleIncreaseQuantity = () => {
+    dispatch(increaseQuantity(id));
+  };
+
+  // Handle decrease quantity
+  const handleDecreaseQuantity = () => {
+    dispatch(decreaseQuantity(id));
   };
 
   // FoodItem card inline styles for professional appearance
@@ -112,6 +122,39 @@ const FoodItem = ({ id, name, price, image, description }) => {
       transform: 'scale(1.05)',
       boxShadow: '0 4px 12px rgba(255, 107, 53, 0.4)',
     },
+    quantityControls: {
+      display: 'flex',
+      gap: '6px',
+      alignItems: 'center',
+    },
+    quantityButton: {
+      width: '28px',
+      height: '28px',
+      border: 'none',
+      borderRadius: '4px',
+      background: '#ff6b35',
+      color: '#ffffff',
+      fontWeight: '700',
+      cursor: 'pointer',
+      fontSize: '14px',
+      transition: 'all 0.2s ease',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      boxShadow: '0 2px 4px rgba(255, 107, 53, 0.2)',
+    },
+    quantityButtonHover: {
+      background: '#f7931e',
+      transform: 'scale(1.1)',
+      boxShadow: '0 4px 8px rgba(255, 107, 53, 0.3)',
+    },
+    quantityDisplay: {
+      fontSize: '14px',
+      fontWeight: '700',
+      minWidth: '20px',
+      textAlign: 'center',
+      color: '#1a1a1a',
+    },
   };
 
   const [isHovered, setIsHovered] = React.useState(false);
@@ -140,17 +183,47 @@ const FoodItem = ({ id, name, price, image, description }) => {
 
         <div style={styles.footer}>
           <span style={styles.price}>₹{price}</span>
-          <button
-            style={{
-              ...styles.button,
-              ...(isButtonHovered ? styles.buttonHover : {}),
-            }}
-            onMouseEnter={() => setIsButtonHovered(true)}
-            onMouseLeave={() => setIsButtonHovered(false)}
-            onClick={handleAddToCart}
-          >
-            Add to Cart
-          </button>
+          {itemQuantity === 0 ? (
+            // Show Add to Cart button if item not in cart
+            <button
+              style={{
+                ...styles.button,
+                ...(isButtonHovered ? styles.buttonHover : {}),
+              }}
+              onMouseEnter={() => setIsButtonHovered(true)}
+              onMouseLeave={() => setIsButtonHovered(false)}
+              onClick={handleAddToCart}
+            >
+              Add to Cart
+            </button>
+          ) : (
+            // Show +/- buttons if item is in cart
+            <div style={styles.quantityControls}>
+              <button
+                style={{
+                  ...styles.quantityButton,
+                  ...(isButtonHovered ? styles.quantityButtonHover : {}),
+                }}
+                onMouseEnter={() => setIsButtonHovered(true)}
+                onMouseLeave={() => setIsButtonHovered(false)}
+                onClick={handleDecreaseQuantity}
+              >
+                −
+              </button>
+              <span style={styles.quantityDisplay}>{itemQuantity}</span>
+              <button
+                style={{
+                  ...styles.quantityButton,
+                  ...(isButtonHovered ? styles.quantityButtonHover : {}),
+                }}
+                onMouseEnter={() => setIsButtonHovered(true)}
+                onMouseLeave={() => setIsButtonHovered(false)}
+                onClick={handleIncreaseQuantity}
+              >
+                +
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
