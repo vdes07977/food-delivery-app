@@ -5,93 +5,71 @@ const initialState = {
   items: [],
 };
 
+// Helper: Consolidate items using Map (100% bulletproof)
+const consolidate = (items) => {
+  const map = new Map();
+  
+  items.forEach(item => {
+    const id = item.id;
+    if (map.has(id)) {
+      const existing = map.get(id);
+      existing.quantity = (existing.quantity || 1) + (item.quantity || 1);
+    } else {
+      map.set(id, {
+        ...item,
+        quantity: item.quantity || 1,
+      });
+    }
+  });
+  
+  return Array.from(map.values());
+};
+
 // Reducer function to manage cart state
 export const cartReducer = (state = initialState, action) => {
+  let newItems = [...state.items];
+
   switch (action.type) {
-    // Add item to cart or increase quantity if already exists
-    case ADD_TO_CART: {
-      const payloadId = action.payload.id;
-      
-      // Check if item already exists
-      const existingItemIndex = state.items.findIndex(item => item.id === payloadId);
-      
-      if (existingItemIndex !== -1) {
-        // Item exists - update it in place with increased quantity
-        const newItems = [...state.items];
-        const currentItem = newItems[existingItemIndex];
-        const currentQty = typeof currentItem.quantity === 'number' ? currentItem.quantity : 1;
-        
-        newItems[existingItemIndex] = {
-          ...currentItem,
-          quantity: currentQty + 1,
-        };
-        
-        return {
-          ...state,
-          items: newItems,
-        };
-      } else {
-        // Item doesn't exist - add new with quantity 1
-        return {
-          ...state,
-          items: [
-            ...state.items,
-            {
-              ...action.payload,
-              quantity: 1,
-            },
-          ],
-        };
-      }
-    }
+    case ADD_TO_CART:
+      newItems.push({
+        ...action.payload,
+        quantity: 1,
+      });
+      break;
 
-    // Remove item from cart by id
     case REMOVE_FROM_CART:
-      return {
-        ...state,
-        items: state.items.filter((item) => item.id !== action.payload),
-      };
+      newItems = newItems.filter(item => item.id !== action.payload);
+      break;
 
-    // Increase quantity of an item
-    case INCREASE_QUANTITY: {
-      return {
-        ...state,
-        items: state.items.map((item) => {
-          if (item.id === action.payload) {
-            const currentQty = typeof item.quantity === 'number' ? item.quantity : 1;
-            return { ...item, quantity: currentQty + 1 };
-          }
-          return item;
-        }),
-      };
-    }
+    case INCREASE_QUANTITY:
+      newItems = newItems.map(item =>
+        item.id === action.payload
+          ? { ...item, quantity: (item.quantity || 1) + 1 }
+          : item
+      );
+      break;
 
-    // Decrease quantity of an item, remove if quantity becomes 0
-    case DECREASE_QUANTITY: {
-      return {
-        ...state,
-        items: state.items
-          .map((item) => {
-            if (item.id === action.payload) {
-              const currentQty = typeof item.quantity === 'number' ? item.quantity : 1;
-              return { ...item, quantity: Math.max(0, currentQty - 1) };
-            }
-            return item;
-          })
-          .filter((item) => item.quantity > 0),
-      };
-    }
+    case DECREASE_QUANTITY:
+      newItems = newItems
+        .map(item =>
+          item.id === action.payload
+            ? { ...item, quantity: Math.max(0, (item.quantity || 1) - 1) }
+            : item
+        )
+        .filter(item => item.quantity > 0);
+      break;
 
-    // Clear all items from cart
-    case CLEAR_CART: {
-      return {
-        ...state,
-        items: [],
-      };
-    }
+    case CLEAR_CART:
+      newItems = [];
+      break;
 
-    // Return default state
     default:
       return state;
   }
+
+  // ALWAYS consolidate after any action - this is key!
+  return {
+    ...state,
+    items: consolidate(newItems),
+  };
 };
