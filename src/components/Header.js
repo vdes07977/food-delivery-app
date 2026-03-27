@@ -6,7 +6,10 @@ const Header = () => {
   // Get cart items from Redux store
   const cartItems = useSelector((state) => state.items);
   // Calculate total quantity of all items in cart
-  const cartCount = cartItems.reduce((total, item) => total + (item.quantity || 1), 0);
+  const cartCount = cartItems.reduce((total, item) => {
+    const qty = typeof item.quantity === 'number' ? item.quantity : 1;
+    return total + qty;
+  }, 0);
 
   // Header inline styles for professional appearance
   const headerStyles = {

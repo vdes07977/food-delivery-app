@@ -8,10 +8,16 @@ const Cart = () => {
   const cartItems = useSelector((state) => state.items);
 
   // Calculate total price using reduce (price * quantity)
-  const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  const totalPrice = cartItems.reduce((total, item) => {
+    const qty = typeof item.quantity === 'number' ? item.quantity : 1;
+    return total + item.price * qty;
+  }, 0);
   
   // Calculate total quantity
-  const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const totalItems = cartItems.reduce((total, item) => {
+    const qty = typeof item.quantity === 'number' ? item.quantity : 1;
+    return total + qty;
+  }, 0);
 
   // Handle remove item from cart
   const handleRemoveItem = (itemId) => {
@@ -270,7 +276,9 @@ const Cart = () => {
                 <span style={styles.itemImage}>{item.image}</span>
                 <div style={styles.itemDetails}>
                   <p style={styles.itemName}>{item.name}</p>
-                  <p style={styles.itemPrice}>₹{item.price} x {item.quantity} = ₹{item.price * item.quantity}</p>
+                  <p style={styles.itemPrice}>
+                    ₹{item.price} x {typeof item.quantity === 'number' ? item.quantity : 1} = ₹{item.price * (typeof item.quantity === 'number' ? item.quantity : 1)}
+                  </p>
                 </div>
               </div>
 
@@ -287,7 +295,7 @@ const Cart = () => {
                   >
                     −
                   </button>
-                  <span style={styles.quantityDisplay}>{item.quantity}</span>
+                  <span style={styles.quantityDisplay}>{typeof item.quantity === 'number' ? item.quantity : 1}</span>
                   <button
                     style={{
                       ...styles.quantityButton,

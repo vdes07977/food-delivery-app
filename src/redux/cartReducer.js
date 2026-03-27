@@ -12,30 +12,30 @@ export const cartReducer = (state = initialState, action) => {
     case ADD_TO_CART: {
       const payloadId = action.payload.id;
       
-      // Remove existing item with same id if it exists
-      const filteredItems = state.items.filter(item => item.id !== payloadId);
+      // Check if item already exists
+      const existingItemIndex = state.items.findIndex(item => item.id === payloadId);
       
-      // Find if we removed an item (it existed)
-      const existingItem = state.items.find(item => item.id === payloadId);
-      
-      if (existingItem) {
-        // Item existed - add it back with increased quantity
+      if (existingItemIndex !== -1) {
+        // Item exists - update it in place with increased quantity
+        const newItems = [...state.items];
+        const currentItem = newItems[existingItemIndex];
+        const currentQty = typeof currentItem.quantity === 'number' ? currentItem.quantity : 1;
+        
+        newItems[existingItemIndex] = {
+          ...currentItem,
+          quantity: currentQty + 1,
+        };
+        
         return {
           ...state,
-          items: [
-            ...filteredItems,
-            {
-              ...existingItem,
-              quantity: existingItem.quantity + 1,
-            },
-          ],
+          items: newItems,
         };
       } else {
-        // Item didn't exist - add new with quantity 1
+        // Item doesn't exist - add new with quantity 1
         return {
           ...state,
           items: [
-            ...filteredItems,
+            ...state.items,
             {
               ...action.payload,
               quantity: 1,
@@ -56,11 +56,13 @@ export const cartReducer = (state = initialState, action) => {
     case INCREASE_QUANTITY: {
       return {
         ...state,
-        items: state.items.map((item) =>
-          item.id === action.payload
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        ),
+        items: state.items.map((item) => {
+          if (item.id === action.payload) {
+            const currentQty = typeof item.quantity === 'number' ? item.quantity : 1;
+            return { ...item, quantity: currentQty + 1 };
+          }
+          return item;
+        }),
       };
     }
 
@@ -69,11 +71,13 @@ export const cartReducer = (state = initialState, action) => {
       return {
         ...state,
         items: state.items
-          .map((item) =>
-            item.id === action.payload
-              ? { ...item, quantity: Math.max(0, item.quantity - 1) }
-              : item
-          )
+          .map((item) => {
+            if (item.id === action.payload) {
+              const currentQty = typeof item.quantity === 'number' ? item.quantity : 1;
+              return { ...item, quantity: Math.max(0, currentQty - 1) };
+            }
+            return item;
+          })
           .filter((item) => item.quantity > 0),
       };
     }

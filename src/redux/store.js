@@ -6,11 +6,13 @@ const consolidateItems = (items) => {
   const consolidated = {};
   items.forEach((item) => {
     if (consolidated[item.id]) {
-      consolidated[item.id].quantity += (item.quantity || 1);
+      const currentQty = typeof consolidated[item.id].quantity === 'number' ? consolidated[item.id].quantity : 1;
+      const itemQty = typeof item.quantity === 'number' ? item.quantity : 1;
+      consolidated[item.id].quantity = currentQty + itemQty;
     } else {
       consolidated[item.id] = {
         ...item,
-        quantity: item.quantity || 1,
+        quantity: typeof item.quantity === 'number' ? item.quantity : 1,
       };
     }
   });
@@ -20,9 +22,9 @@ const consolidateItems = (items) => {
 // Load initial state from localStorage or use empty
 const loadInitialState = () => {
   try {
-    // Clear old cart keys completely
-    localStorage.removeItem('cart');
-    localStorage.removeItem('fooddel_cart');
+    // Completely clear all old cache
+    localStorage.clear();
+    sessionStorage.clear();
     
     return { items: [] };
   } catch (error) {
