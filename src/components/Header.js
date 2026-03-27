@@ -5,7 +5,8 @@ import { useSelector } from 'react-redux';
 const Header = () => {
   // Get cart items from Redux store
   const cartItems = useSelector((state) => state.items);
-  const cartCount = cartItems.length;
+  // Calculate total quantity of all items in cart
+  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   // Header inline styles for professional appearance
   const headerStyles = {

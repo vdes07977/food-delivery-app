@@ -1,18 +1,31 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { removeFromCart, clearCart } from '../redux/cartActions';
+import { removeFromCart, increaseQuantity, decreaseQuantity, clearCart } from '../redux/cartActions';
 
 // Cart component to display cart items and total price
 const Cart = () => {
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.items);
 
-  // Calculate total price using reduce
-  const totalPrice = cartItems.reduce((total, item) => total + item.price, 0);
+  // Calculate total price using reduce (price * quantity)
+  const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  
+  // Calculate total quantity
+  const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   // Handle remove item from cart
-  const handleRemoveItem = (cartId) => {
-    dispatch(removeFromCart(cartId));
+  const handleRemoveItem = (itemId) => {
+    dispatch(removeFromCart(itemId));
+  };
+
+  // Handle increase quantity
+  const handleIncreaseQuantity = (itemId) => {
+    dispatch(increaseQuantity(itemId));
+  };
+
+  // Handle decrease quantity
+  const handleDecreaseQuantity = (itemId) => {
+    dispatch(decreaseQuantity(itemId));
   };
 
   // Handle clear entire cart
@@ -101,6 +114,40 @@ const Cart = () => {
       color: '#ff6b35',
       fontWeight: '600',
     },
+    quantitySection: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      background: '#f5f5f5',
+      borderRadius: '6px',
+      padding: '4px 8px',
+    },
+    quantityButton: {
+      background: '#ff6b35',
+      color: '#ffffff',
+      border: 'none',
+      width: '28px',
+      height: '28px',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      fontWeight: '600',
+      fontSize: '16px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      transition: 'all 0.2s ease',
+    },
+    quantityButtonHover: {
+      background: '#e55100',
+      transform: 'scale(1.1)',
+    },
+    quantityDisplay: {
+      minWidth: '30px',
+      textAlign: 'center',
+      fontWeight: '600',
+      color: '#1a1a1a',
+      fontSize: '14px',
+    },
     removeButton: {
       background: '#ff6b35',
       color: '#ffffff',
@@ -181,6 +228,7 @@ const Cart = () => {
 
   const [hoveredItemId, setHoveredItemId] = React.useState(null);
   const [hoveredButtonType, setHoveredButtonType] = React.useState(null);
+  const [hoveredQtyButton, setHoveredQtyButton] = React.useState(null);
 
   // If cart is empty, show empty state
   if (cartItems.length === 0) {
@@ -203,40 +251,68 @@ const Cart = () => {
         <div style={styles.header}>
           <h2 style={styles.title}>Your Cart</h2>
           <span style={{ fontSize: '14px', color: '#666666' }}>
-            {cartItems.length} item{cartItems.length !== 1 ? 's' : ''}
+            {totalItems} item{totalItems !== 1 ? 's' : ''}
           </span>
         </div>
 
         <div style={styles.cartList}>
           {cartItems.map((item) => (
             <div
-              key={item.cartId}
+              key={item.id}
               style={{
                 ...styles.cartItem,
-                ...(hoveredItemId === item.cartId ? styles.cartItemHover : {}),
+                ...(hoveredItemId === item.id ? styles.cartItemHover : {}),
               }}
-              onMouseEnter={() => setHoveredItemId(item.cartId)}
+              onMouseEnter={() => setHoveredItemId(item.id)}
               onMouseLeave={() => setHoveredItemId(null)}
             >
               <div style={styles.itemInfo}>
                 <span style={styles.itemImage}>{item.image}</span>
                 <div style={styles.itemDetails}>
                   <p style={styles.itemName}>{item.name}</p>
-                  <p style={styles.itemPrice}>₹{item.price}</p>
+                  <p style={styles.itemPrice}>₹{item.price} x {item.quantity} = ₹{item.price * item.quantity}</p>
                 </div>
               </div>
 
-              <button
-                style={{
-                  ...styles.removeButton,
-                  ...(hoveredButtonType === item.cartId ? styles.removeButtonHover : {}),
-                }}
-                onMouseEnter={() => setHoveredButtonType(item.cartId)}
-                onMouseLeave={() => setHoveredButtonType(null)}
-                onClick={() => handleRemoveItem(item.cartId)}
-              >
-                Remove
-              </button>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <div style={styles.quantitySection}>
+                  <button
+                    style={{
+                      ...styles.quantityButton,
+                      ...(hoveredQtyButton === `${item.id}-minus` ? styles.quantityButtonHover : {}),
+                    }}
+                    onMouseEnter={() => setHoveredQtyButton(`${item.id}-minus`)}
+                    onMouseLeave={() => setHoveredQtyButton(null)}
+                    onClick={() => handleDecreaseQuantity(item.id)}
+                  >
+                    −
+                  </button>
+                  <span style={styles.quantityDisplay}>{item.quantity}</span>
+                  <button
+                    style={{
+                      ...styles.quantityButton,
+                      ...(hoveredQtyButton === `${item.id}-plus` ? styles.quantityButtonHover : {}),
+                    }}
+                    onMouseEnter={() => setHoveredQtyButton(`${item.id}-plus`)}
+                    onMouseLeave={() => setHoveredQtyButton(null)}
+                    onClick={() => handleIncreaseQuantity(item.id)}
+                  >
+                    +
+                  </button>
+                </div>
+
+                <button
+                  style={{
+                    ...styles.removeButton,
+                    ...(hoveredButtonType === item.id ? styles.removeButtonHover : {}),
+                  }}
+                  onMouseEnter={() => setHoveredButtonType(item.id)}
+                  onMouseLeave={() => setHoveredButtonType(null)}
+                  onClick={() => handleRemoveItem(item.id)}
+                >
+                  Remove
+                </button>
+              </div>
             </div>
           ))}
         </div>
