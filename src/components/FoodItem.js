@@ -1,10 +1,15 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../redux/cartActions';
 
 // Individual food item card component
 const FoodItem = ({ id, name, price, image, description }) => {
   const dispatch = useDispatch();
+  
+  // Get cart items from Redux to show quantity for this item
+  const cartItems = useSelector((state) => state.items);
+  const itemInCart = cartItems.find((item) => item.id === id);
+  const itemQuantity = itemInCart ? (itemInCart.quantity || 1) : 0;
 
   // Handle add to cart action
   const handleAddToCart = () => {
@@ -49,6 +54,18 @@ const FoodItem = ({ id, name, price, image, description }) => {
       borderRadius: '4px',
       fontSize: '12px',
       fontWeight: '600',
+    },
+    quantityBadge: {
+      position: 'absolute',
+      top: '10px',
+      left: '10px',
+      background: '#2ecc71',
+      color: '#ffffff',
+      padding: '6px 12px',
+      borderRadius: '20px',
+      fontSize: '14px',
+      fontWeight: '700',
+      boxShadow: '0 2px 8px rgba(46, 204, 113, 0.3)',
     },
     content: {
       padding: '16px',
@@ -111,6 +128,9 @@ const FoodItem = ({ id, name, price, image, description }) => {
     >
       <div style={styles.imageContainer}>
         <span>{image}</span>
+        {itemQuantity > 0 && (
+          <span style={styles.quantityBadge}>Qty: {itemQuantity}</span>
+        )}
         <span style={styles.badge}>Fresh</span>
       </div>
 
