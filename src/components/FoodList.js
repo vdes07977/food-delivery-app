@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import FoodItem from './FoodItem';
 
 // Static food items data
@@ -49,6 +50,11 @@ const FOOD_ITEMS = [
 
 // FoodList component to display all food items in a grid
 const FoodList = () => {
+  // Get cart items from Redux to show count
+  const cartItems = useSelector((state) => state.items);
+  const totalQuantity = cartItems.reduce((total, item) => total + (item.quantity || 1), 0);
+  const totalPrice = cartItems.reduce((total, item) => total + item.price * (item.quantity || 1), 0);
+
   const styles = {
     container: {
       padding: '40px 20px',
@@ -69,6 +75,38 @@ const FoodList = () => {
       fontSize: '16px',
       color: '#666666',
     },
+    cartSummary: {
+      background: '#ffffff',
+      borderRadius: '12px',
+      padding: '16px 24px',
+      marginBottom: '30px',
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+      maxWidth: '1200px',
+      margin: '0 auto 30px',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    cartInfo: {
+      display: 'flex',
+      gap: '30px',
+      alignItems: 'center',
+    },
+    cartItem: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+    },
+    cartLabel: {
+      fontSize: '14px',
+      color: '#666666',
+      fontWeight: '600',
+    },
+    cartValue: {
+      fontSize: '20px',
+      fontWeight: '700',
+      color: '#ff6b35',
+    },
     grid: {
       display: 'grid',
       gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
@@ -84,6 +122,26 @@ const FoodList = () => {
         <h2 style={styles.title}>Our Delicious Menu</h2>
         <p style={styles.subtitle}>Choose from our wide variety of fresh and delicious food</p>
       </div>
+
+      {cartItems.length > 0 && (
+        <div style={styles.cartSummary}>
+          <span style={{ fontSize: '16px', fontWeight: '600', color: '#1a1a1a' }}>📦 Cart Summary</span>
+          <div style={styles.cartInfo}>
+            <div style={styles.cartItem}>
+              <span style={styles.cartLabel}>Items:</span>
+              <span style={styles.cartValue}>{cartItems.length}</span>
+            </div>
+            <div style={styles.cartItem}>
+              <span style={styles.cartLabel}>Quantity:</span>
+              <span style={styles.cartValue}>{totalQuantity}</span>
+            </div>
+            <div style={styles.cartItem}>
+              <span style={styles.cartLabel}>Total:</span>
+              <span style={styles.cartValue}>₹{totalPrice}</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div style={styles.grid}>
         {FOOD_ITEMS.map((item) => (
